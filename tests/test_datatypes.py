@@ -49,7 +49,7 @@ class TestAddress(unittest.TestCase):
             "countryCode": "DE"
         }
         obj = dt.Address(address_dict)
-        self.assertEqual("", obj.supplement)
+        self.assertIsNone(obj.supplement)
 
 
 class TestLineItem(unittest.TestCase):
@@ -117,7 +117,7 @@ class TestVoucher(unittest.TestCase):
             "createdDate": "2021-03-22T12:36:22.000+01:00",
             "updatedDate": "2021-03-22T12:36:22.000+01:00",
             "dueDate": "2021-06-21T00:00:00.000+02:00",
-            "contactId": "null",
+            "contactId": None,
             "contactName": "Sammellieferant",
             "totalAmount": 80.04,
             "openAmount": 80.04,
@@ -145,7 +145,7 @@ class TestVoucherList(unittest.TestCase):
                     "createdDate": "2021-03-22T12:36:22.000+01:00",
                     "updatedDate": "2021-03-22T12:36:22.000+01:00",
                     "dueDate": "2021-06-21T00:00:00.000+02:00",
-                    "contactId": "null",
+                    "contactId": None,
                     "contactName": "Sammellieferant",
                     "totalAmount": 80.04,
                     "openAmount": 80.04,
@@ -211,6 +211,145 @@ class TestVoucherList(unittest.TestCase):
         self.assertEqual(0, obj.number)
         self.assertTrue(obj.first)
         self.assertTrue(obj.last)
+
+class TestInvoice(unittest.TestCase):
+
+    def test_invoice(self):
+        invoice = {
+            "id": "e9066f04-8cc7-4616-93f8-ac9ecc8479c8",
+            "organizationId": "aa93e8a8-2aa3-470b-b914-caad8a255dd8",
+            "createdDate": "2017-04-24T08:20:22.528+02:00",
+            "updatedDate": "2017-04-24T08:20:22.528+02:00",
+            "version": 0,
+            "language": "de",
+            "archived": False,
+            "voucherStatus": "draft",
+            "voucherNumber": "RE1019",
+            "voucherDate": "2017-02-22T00:00:00.000+01:00",
+            "dueDate": None,
+            "address": {
+                "contactId": None,
+                "name": "Bike & Ride GmbH & Co. KG",
+                "supplement": "Gebäude 10",
+                "street": "Musterstraße 42",
+                "city": "Freiburg",
+                "zip": "79112",
+                "countryCode": "DE"
+            },
+            "xRechnung": None,
+            "lineItems": [
+                {
+                    "id": "97b98491-e953-4dc9-97a9-ae437a8052b4",
+                    "type": "material",
+                    "name": "Abus Kabelschloss Primo 590 ",
+                    "description": "· 9,5 mm starkes, smoke-mattes Spiralkabel mit integrierter Halterlösung zur Befestigung am Sattelklemmbolzen · bewährter Qualitäts-Schließzylinder mit praktischem Wendeschlüssel · KabelØ: 9,5 mm, Länge: 150 cm",
+                    "quantity": 2,
+                    "unitName": "Stück",
+                    "unitPrice": {
+                        "currency": "EUR",
+                        "netAmount": 13.4,
+                        "grossAmount": 15.95,
+                        "taxRatePercentage": 19
+                    },
+                    "discountPercentage": 50,
+                    "lineItemAmount": 13.4
+                },
+                {
+                    "id": "dc4c805b-7df1-4310-a548-22be4499eb04",
+                    "type": "service",
+                    "name": "Aufwändige Montage",
+                    "description": "Aufwand für arbeitsintensive Montagetätigkeit",
+                    "quantity": 1,
+                    "unitName": "Stunde",
+                    "unitPrice": {
+                        "currency": "EUR",
+                        "netAmount": 8.32,
+                        "grossAmount": 8.9,
+                        "taxRatePercentage": 7
+                    },
+                    "discountPercentage": 0,
+                    "lineItemAmount": 8.32
+                },
+                {
+                    "id": None,
+                    "type": "custom",
+                    "name": "Energieriegel Testpaket",
+                    "description": None,
+                    "quantity": 1,
+                    "unitName": "Stück",
+                    "unitPrice": {
+                        "currency": "EUR",
+                        "netAmount": 5,
+                        "grossAmount": 5,
+                        "taxRatePercentage": 0
+                    },
+                    "discountPercentage": 0,
+                    "lineItemAmount": 5
+                },
+                {
+                    "type": "text",
+                    "name": "Freitextposition",
+                    "description": "This item type can contain either a name or a description or both."
+                }
+            ],
+            "totalPrice": {
+                "currency": "EUR",
+                "totalNetAmount": 26.72,
+                "totalGrossAmount": 29.85,
+                "totalTaxAmount": 3.13,
+                "totalDiscountAbsolute": None,
+                "totalDiscountPercentage": None
+            },
+            "taxAmounts": [
+                {
+                    "taxRatePercentage": 0,
+                    "taxAmount": 0,
+                    "netAmount": 5
+                },
+                {
+                    "taxRatePercentage": 7,
+                    "taxAmount": 0.58,
+                    "netAmount": 8.32
+                },
+                {
+                    "taxRatePercentage": 19,
+                    "taxAmount": 2.55,
+                    "netAmount": 13.4
+                }
+            ],
+            "taxConditions": {
+                "taxType": "net",
+                "taxTypeNote": None
+            },
+            "paymentConditions": {
+                "paymentTermLabel": "10 Tage - 3 %, 30 Tage netto",
+                "paymentTermLabelTemplate": "{discountRange} Tage -{discount}, {paymentRange} Tage netto",
+                "paymentTermDuration": 30,
+                "paymentDiscountConditions": {
+                    "discountPercentage": 3,
+                    "discountRange": 10
+                }
+            },
+            "shippingConditions": {
+                "shippingDate": "2017-04-22T00:00:00.000+02:00",
+                "shippingEndDate": None,
+                "shippingType": "delivery"
+            },
+            "closingInvoice": False,
+            "claimedGrossAmount": None,
+            "downPaymentDeductions": None,
+            "recurringTemplateId": None,
+            "relatedVouchers": [],
+            "title": "Rechnung",
+            "introduction": "Ihre bestellten Positionen stellen wir Ihnen hiermit in Rechnung",
+            "remark": "Vielen Dank für Ihren Einkauf",
+            "files": {
+                "documentFileId": "75295db7-7e69-4630-befd-a7f4ddfdaa83"
+            }
+        }
+        obj = dt.Invoice(invoice)
+        self.assertIsNone(obj.total_price.total_discount_absolute)
+        self.assertIsNone(obj.total_price.total_discount_percentage)
 
 
 if __name__ == '__main__':

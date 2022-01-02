@@ -43,20 +43,20 @@ class Address:
     countryCode: str
 
     def __init__(self, address: dict):
-        self.contact_id = uuid.UUID(address['contactId'])
-        self.name = address['name']
-        if 'supplement' in address:
-            self.supplement = address['supplement']
-        else:
-            self.supplement = ""
-        self.street = address['street']
-        self.city = address['city']
         try:
-            self.zip = int(address['zip'])
-        except ValueError:
+            self.contact_id = uuid.UUID(address.get('contactId'))
+        except TypeError:
+            self.contact_id = None
+        self.name = address.get('name')
+        self.supplement = address.get('supplement')
+        self.street = address.get('street')
+        self.city = address.get('city')
+        try:
+            self.zip = int(address.get('zip'))
+        except (ValueError, TypeError):
             self.zip = 0
             pass
-        self.countryCode = address['countryCode']
+        self.countryCode = address.get('countryCode')
 
 class UnitPrice:
     currency: str
@@ -65,10 +65,26 @@ class UnitPrice:
     tax_rate_percentage: int
 
     def __init__(self, unit_price: dict):
-        self.currency = unit_price['currency']
-        self.net_amount = unit_price['netAmount']
-        self.gross_amount = unit_price['grossAmount']
-        self.tax_rate_percentage = unit_price['taxRatePercentage']
+        self.currency = unit_price.get('currency')
+        self.net_amount = unit_price.get('netAmount')
+        self.gross_amount = unit_price.get('grossAmount')
+        self.tax_rate_percentage = unit_price.get('taxRatePercentage')
+
+class TotalPrice:
+    currency: str
+    total_net_amount: float
+    total_gross_amount: float
+    total_tax_amount: float
+    total_discount_absolute: float
+    total_discount_percentage: float
+
+    def __init__(self, total_price: dict):
+        self.currency = total_price.get('currency')
+        self.total_net_amount = total_price.get('totalNetAmount')
+        self.total_gross_amount = total_price.get('totalGrossAmount')
+        self.total_tax_amount = total_price.get('totalTaxAmount')
+        self.total_discount_absolute = total_price.get('totalDiscountAbsolute')
+        self.total_discount_percentage = total_price.get('totalDiscountPercentage')
 
 class LineItem:
     id: uuid.uuid4
@@ -82,18 +98,23 @@ class LineItem:
     line_item_amount: float
 
     def __init__(self, line_item: dict):
-        self.id = uuid.UUID(line_item['id'])
         try:
-            self.type = Type(line_item['type'])
+            self.id = uuid.UUID(line_item.get('id'))
+        except TypeError:
+            self.id = None
+        try:
+            self.type = Type(line_item.get('type'))
         except ValueError:
             self.type = Type.UNDEFINED
-        self.name = line_item['name']
-        self.description = line_item['description']
-        self.quantity = line_item['quantity']
-        self.unit_name = line_item['unitName']
-        self.unit_price = UnitPrice(line_item['unitPrice'])
-        self.discount_percentage = line_item['discountPercentage']
-        self.line_item_amount = line_item['lineItemAmount']
+        self.name = line_item.get('name')
+        self.description = line_item.get('description')
+        if self.type == Type.MATERIAL or self.type == Type.CUSTOM:
+            self.quantity = line_item.get('quantity')
+            self.unit_name = line_item.get('unitName')
+            self.unit_price = UnitPrice(line_item.get('unitPrice'))
+            self.discount_percentage = line_item.get('discountPercentage')
+            self.line_item_amount = line_item.get('lineItemAmount')
+
 
 class Invoice:
     id: uuid.uuid4
@@ -108,22 +129,33 @@ class Invoice:
     voucher_date: datetime
     due_date: datetime
     address: Address
-    line_items: list
+    line_items: list[LineItem]
+    total_price: TotalPrice
 
     def __init__(self, invoice: dict):
-        self.id = uuid.UUID(invoice['id'])
-        self.organization_id = uuid.UUID(invoice['organizationId'])
-        self.created_date = datetime.fromisoformat(invoice['createdDate'])
-        self.updated_date = datetime.fromisoformat(invoice['updatedDate'])
-        self.version = invoice['version']
-        self.language = invoice['language']
-        self.archived = invoice['archived']
-        self.voucher_status = invoice['voucherStatus']
-        self.voucher_number = invoice['voucherNumber']
-        self.voucher_date = datetime.fromisoformat(invoice['voucherDate'])
-        self.due_date = datetime.fromisoformat(invoice['dueDate'])
-        self.address = Address(invoice['address'])
-        self.line_items = invoice['lineItems']
+        try:
+            self.id = uuid.UUID(invoice.get('id'))
+        except TypeError:
+            self.id = None
+        try:
+            self.organization_id = uuid.UUID(invoice.get('organizationId'))
+        except TypeError:
+            self.organization_id = None
+        self.created_date = datetime.fromisoformat(invoice.get('createdDate'))
+        self.updated_date = datetime.fromisoformat(invoice.get('updatedDate'))
+        self.version = invoice.get('version')
+        self.language = invoice.get('language')
+        self.archived = invoice.get('archived')
+        self.voucher_status = invoice.get('voucherStatus')
+        self.voucher_number = invoice.get('voucherNumber')
+        self.voucher_date = datetime.fromisoformat(invoice.get('voucherDate'))
+        if invoice.get('dueDate') is not None:
+            self.due_date = datetime.fromisoformat(invoice.get('dueDate'))
+        self.address = Address(invoice.get('address'))
+        self.line_items = []
+        for item in invoice.get('lineItems'):
+            self.line_items.append(LineItem(item))
+        self.total_price = TotalPrice(invoice.get('totalPrice'))
 
 class Voucher:
     id: uuid.uuid4
@@ -142,23 +174,23 @@ class Voucher:
     archived: bool
 
     def __init__(self, voucher: dict):
-        self.id = uuid.UUID(voucher['id'])
-        self.voucher_type = VoucherType(voucher['voucherType'])
-        self.voucher_status = VoucherStatus(voucher['voucherStatus'])
-        self.voucher_number = voucher['voucherNumber']
-        self.voucher_date = datetime.fromisoformat(voucher['voucherDate'])
-        self.created_date = datetime.fromisoformat(voucher['createdDate'])
-        self.updated_date = datetime.fromisoformat(voucher['updatedDate'])
-        self.due_date = datetime.fromisoformat(voucher['dueDate'])
-        if ('contactId' in voucher and voucher['contactId'] == "null") or ('contactId' not in voucher):
-            self.contact_id = None
-        else:
-            self.contact_id = voucher['contactId']
-        self.contact_name = voucher['contactName']
-        self.total_amount = voucher['totalAmount']
-        self.open_amount = voucher['openAmount']
-        self.currency = voucher['currency']
-        self.archived = voucher['archived']
+        try:
+            self.id = uuid.UUID(voucher.get('id'))
+        except TypeError:
+            self.id = None
+        self.voucher_type = VoucherType(voucher.get('voucherType'))
+        self.voucher_status = VoucherStatus(voucher.get('voucherStatus'))
+        self.voucher_number = voucher.get('voucherNumber')
+        self.voucher_date = datetime.fromisoformat(voucher.get('voucherDate'))
+        self.created_date = datetime.fromisoformat(voucher.get('createdDate'))
+        self.updated_date = datetime.fromisoformat(voucher.get('updatedDate'))
+        self.due_date = datetime.fromisoformat(voucher.get('dueDate'))
+        self.contact_id = voucher.get('contactId')
+        self.contact_name = voucher.get('contactName')
+        self.total_amount = voucher.get('totalAmount')
+        self.open_amount = voucher.get('openAmount')
+        self.currency = voucher.get('currency')
+        self.archived = voucher.get('archived')
 
 class VoucherList:
     content: list[Voucher]
@@ -171,15 +203,15 @@ class VoucherList:
     number: int
     sort: list
 
-    def __init__(self, voucherlist: dict):
+    def __init__(self, voucher_list: dict):
         self.content = []
-        for voucher in voucherlist['content']:
+        for voucher in voucher_list.get('content'):
             self.content.append(Voucher(voucher))
-        self.first = voucherlist['first']
-        self.last = voucherlist['last']
-        self.total_pages = voucherlist['totalPages']
-        self.total_elements = voucherlist['totalElements']
-        self.number_of_elements = voucherlist['numberOfElements']
-        self.size = voucherlist['size']
-        self.number = voucherlist['number']
-        self.sort = voucherlist['sort']
+        self.first = voucher_list.get('first')
+        self.last = voucher_list.get('last')
+        self.total_pages = voucher_list.get('totalPages')
+        self.total_elements = voucher_list.get('totalElements')
+        self.number_of_elements = voucher_list.get('numberOfElements')
+        self.size = voucher_list.get('size')
+        self.number = voucher_list.get('number')
+        self.sort = voucher_list.get('sort')
