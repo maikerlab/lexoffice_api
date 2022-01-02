@@ -1,8 +1,9 @@
 import uuid
-
 import requests
 from requests.exceptions import RequestException
 from lexoffice_api.datatypes import VoucherList, Invoice, VoucherType, VoucherStatus
+from lexoffice_api.exceptions import LexofficeException
+
 
 class LexofficeClient:
 
@@ -80,10 +81,5 @@ class LexofficeClient:
         )
         content = response.json()
         if response.status_code != 200:
-            if 'error' in content and 'message' in content:
-                error = content['error']
-                msg = content['message']
-                raise RequestException(f'{error}: {msg}')
-            else:
-                raise RequestException(f'Error while getting invoice from Lexoffice API')
+            raise LexofficeException(response, 'Error while getting invoice from Lexoffice API')
         return Invoice(content)
