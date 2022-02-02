@@ -5,7 +5,6 @@ setup(
     version='0.1.0',
     description='Python library for interacting with the Public API of Lexoffice',
     author='Maik Lorenz',
-    license='MIT',
     install_requires=[],
     test_suite='tests',
 )
