@@ -3,12 +3,12 @@ import unittest
 import uuid
 
 from requests.exceptions import RequestException
-from src.lexoffice_api import api
-from src.lexoffice_api.datatypes import VoucherType, VoucherStatus
+from src.lexoffice import api
+from src.lexoffice.datatypes import VoucherType, VoucherStatus
 
 from dotenv import load_dotenv
 
-from src.lexoffice_api.exceptions import LexofficeException
+from src.lexoffice.exceptions import LexofficeException
 
 load_dotenv()
 

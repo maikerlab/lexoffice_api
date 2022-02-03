@@ -1,6 +1,6 @@
 import unittest
 import uuid
-from src import lexoffice_api as dt
+from src import lexoffice as dt
 
 
 class TestAddress(unittest.TestCase):

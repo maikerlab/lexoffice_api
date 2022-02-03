@@ -1,9 +1,8 @@
 import uuid
 import requests
 from requests.exceptions import RequestException
-from src.lexoffice_api.datatypes import VoucherList, Invoice, VoucherType, VoucherStatus
-from src.lexoffice_api.exceptions import LexofficeException
-
+from .datatypes import VoucherList, Invoice, VoucherType, VoucherStatus
+from .exceptions import LexofficeException
 
 class LexofficeClient:
 
