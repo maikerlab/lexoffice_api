@@ -31,7 +31,7 @@ class LexofficeClient:
         else:
             return False
 
-    def get_voucherlist(self, voucher_type: VoucherType, status: list[VoucherStatus], page: int = None, size: int = None) -> VoucherList:
+    def get_voucherlist(self, voucher_type: VoucherType, status: list[VoucherStatus] = None, page: int = None, size: int = None) -> VoucherList:
         """ Fetch a voucherlist.
 
         :param voucher_type: type(s) of the vouchers to be fetched
@@ -40,11 +40,12 @@ class LexofficeClient:
         :param size: Size of the page (max. number of vouchers to be fetched
         :return: VoucherList contatining the requested Vouchers
         """
-        if len(status) < 1:
-            raise ValueError('Specify at least 1 status')
-        status_str = []
-        for s in status:
-            status_str.append(s.value)
+        if status is None:
+            status_str = ["any"]
+        else:
+            status_str = []
+            for s in status:
+                status_str.append(s.value)
         params = {
             'voucherType': voucher_type.value,
             'voucherStatus': ','.join(status_str),

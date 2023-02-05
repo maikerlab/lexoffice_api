@@ -127,7 +127,7 @@ class Invoice:
     voucher_status: VoucherStatus
     voucher_number: str
     voucher_date: datetime
-    due_date: datetime
+    due_date: datetime = None
     address: Address
     line_items: list[LineItem]
     total_price: TotalPrice
@@ -149,8 +149,7 @@ class Invoice:
         self.voucher_status = invoice.get('voucherStatus')
         self.voucher_number = invoice.get('voucherNumber')
         self.voucher_date = datetime.fromisoformat(invoice.get('voucherDate'))
-        if invoice.get('dueDate') is not None:
-            self.due_date = datetime.fromisoformat(invoice.get('dueDate'))
+        self.due_date = datetime.fromisoformat(invoice.get('dueDate')) if 'dueDate' in invoice else None
         self.address = Address(invoice.get('address'))
         self.line_items = []
         for item in invoice.get('lineItems'):
@@ -165,7 +164,7 @@ class Voucher:
     voucher_date: datetime
     created_date: datetime
     updated_date: datetime
-    due_date: datetime
+    due_date: datetime = None
     contact_id: uuid.uuid4
     contact_name: str
     total_amount: float
@@ -184,7 +183,7 @@ class Voucher:
         self.voucher_date = datetime.fromisoformat(voucher.get('voucherDate'))
         self.created_date = datetime.fromisoformat(voucher.get('createdDate'))
         self.updated_date = datetime.fromisoformat(voucher.get('updatedDate'))
-        self.due_date = datetime.fromisoformat(voucher.get('dueDate'))
+        self.due_date = datetime.fromisoformat(voucher.get('dueDate')) if 'dueDate' in voucher else None
         self.contact_id = voucher.get('contactId')
         self.contact_name = voucher.get('contactName')
         self.total_amount = voucher.get('totalAmount')
