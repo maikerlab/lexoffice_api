@@ -148,8 +148,9 @@ class Invoice:
         self.archived = invoice.get('archived')
         self.voucher_status = invoice.get('voucherStatus')
         self.voucher_number = invoice.get('voucherNumber')
+        if 'dueDate' in invoice and invoice.get('dueDate') is not None:
+            self.due_date = datetime.fromisoformat(invoice.get('dueDate'))
         self.voucher_date = datetime.fromisoformat(invoice.get('voucherDate'))
-        self.due_date = datetime.fromisoformat(invoice.get('dueDate')) if 'dueDate' in invoice else None
         self.address = Address(invoice.get('address'))
         self.line_items = []
         for item in invoice.get('lineItems'):
@@ -183,7 +184,8 @@ class Voucher:
         self.voucher_date = datetime.fromisoformat(voucher.get('voucherDate'))
         self.created_date = datetime.fromisoformat(voucher.get('createdDate'))
         self.updated_date = datetime.fromisoformat(voucher.get('updatedDate'))
-        self.due_date = datetime.fromisoformat(voucher.get('dueDate')) if 'dueDate' in voucher else None
+        if 'dueDate' in voucher and voucher.get('dueDate') is not None:
+            self.due_date = datetime.fromisoformat(voucher.get('dueDate'))
         self.contact_id = voucher.get('contactId')
         self.contact_name = voucher.get('contactName')
         self.total_amount = voucher.get('totalAmount')
